@@ -40,12 +40,12 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     LongPressDraggable(modifier = Modifier.fillMaxSize()) {
-                        LazyColumn(
+                        LazyRow(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(horizontal = 10.dp)
                         ) {
-                            items(items = foodList) { food ->
-                                FoodItemCard(foodItem = food)
+                            items(items = appList) { app ->
+                                FoodItemCard(appItem = app)
                             }
                         }
                         PersonListContainer()
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 fun BoxScope.PersonListContainer() {
     LazyRow(
         modifier = Modifier
-            .fillMaxHeight(0.3f)
+            .fillMaxHeight(0.2f)
             .fillMaxWidth()
             .background(
                 Color.LightGray,
@@ -80,16 +80,16 @@ fun BoxScope.PersonListContainer() {
 }
 
 @Composable
-fun PersonCard(person: Person) {
-    val foodItems = remember {
-        mutableStateMapOf<Int, FoodItem>()
+fun PersonCard(dropItem: DropItem) {
+    val item by remember {
+        mutableStateOf(dropItem)
     }
 
-    DropTarget<FoodItem>(
+    DropTarget<AppItem>(
         modifier = Modifier
             .padding(6.dp)
-            .width(width = 120.dp)
-            .fillMaxHeight(0.8f)
+            .clip(CircleShape)
+            .wrapContentSize()
     ) { isInBound, foodItem ->
         val bgColor = if (isInBound) {
             Color.Red
@@ -97,97 +97,37 @@ fun PersonCard(person: Person) {
             Color.White
         }
 
+        val size = if(isInBound) 60.dp else 40.dp
+
         foodItem?.let {
             if (isInBound)
-                foodItems[foodItem.id] = foodItem
+                item.image = foodItem.image
         }
 
-        Column(
+        Image(
+            painter = painterResource(id = item.image), contentDescription = null,
             modifier = Modifier
-                .fillMaxSize()
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
-                .background(
-                    bgColor,
-                    RoundedCornerShape(16.dp)
-                ),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Image(
-                painter = painterResource(id = person.profile), contentDescription = null,
-                modifier = Modifier
-                    .size(70.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = person.name,
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            if (foodItems.isNotEmpty()) {
-                Text(
-                    text = "$${foodItems.values.sumOf { it.price }}",
-                    fontSize = 16.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = "${foodItems.size} Items",
-                    fontSize = 14.sp,
-                    color = Color.Black
-                )
-            }
-        }
+                .background(bgColor)
+                .size(size)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
 @Composable
-fun FoodItemCard(foodItem: FoodItem) {
-
-    Card(
-        elevation = 10.dp, backgroundColor = Color.White,
-        shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(10.dp)
-        ) {
-            DragTarget(modifier = Modifier.size(130.dp), dataToDrop = foodItem) {
-                Image(
-                    painter = painterResource(id = foodItem.image),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(130.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                )
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = foodItem.name,
-                    fontSize = 22.sp,
-                    color = Color.DarkGray
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "$${foodItem.price}",
-                    fontSize = 18.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.ExtraBold
-                )
-            }
-        }
+fun FoodItemCard(appItem: AppItem) {
+    DragTarget(modifier = Modifier
+        .wrapContentSize()
+        .padding(16.dp), dataToDrop = appItem) {
+        Image(
+            painter = painterResource(id = appItem.image),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+        )
     }
 }
 
